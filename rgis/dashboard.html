@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>РГИСИ · Режиссёр-драматург — интерактивное пособие</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0a12; --bg2:#15101f; --side:#140f1d; --card:#1b1626; --card2:#211a30;
+  --gold:#c9a24b; --gold2:#e3c477; --bordeaux:#7a2233; --bordeaux2:#5e1f2b;
+  --ink:#ece6d8; --muted:#9a92a6; --line:#2e2740; --ok:#4caf7d; --bad:#c8553d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(122,34,51,.18), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgba(201,162,75,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'PT Serif','PT Sans',Georgia,'Times New Roman',serif;
+  line-height:1.6;
+  min-height:100vh;
+}
+.layout{display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{
+  width:300px;flex:0 0 300px;background:linear-gradient(180deg,var(--side),#0e0a16);
+  border-right:1px solid var(--line);padding:22px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.brand{font-family:'Playfair Display',serif;font-weight:900;font-size:20px;color:var(--gold2);letter-spacing:.5px;margin:0 0 2px}
+.brand small{display:block;font-family:'PT Sans',sans-serif;font-weight:400;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.side-sub{font-size:12.5px;color:var(--muted);margin:12px 0 16px;border-left:2px solid var(--bordeaux);padding-left:10px}
+.nav-btn{
+  display:block;width:100%;text-align:left;margin:6px 0;padding:11px 13px;cursor:pointer;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;
+  font-family:'PT Sans',sans-serif;font-size:14px;font-weight:700;transition:.18s;
+}
+.nav-btn:hover{border-color:var(--gold);color:var(--gold2);transform:translateX(3px)}
+.nav-btn.active{background:linear-gradient(90deg,var(--bordeaux2),var(--bordeaux));border-color:var(--gold);color:#fff;box-shadow:0 0 0 1px rgba(201,162,75,.35) inset}
+.nav-steps{display:flex;gap:8px;margin-top:16px}
+.nav-steps button{
+  flex:1;padding:9px 0;cursor:pointer;background:var(--card2);color:var(--gold2);
+  border:1px solid var(--line);border-radius:9px;font-family:'PT Sans',sans-serif;font-weight:700;font-size:13px;transition:.18s;
+}
+.nav-steps button:hover{border-color:var(--gold);background:var(--card)}
+.deadline{margin-top:18px;font-size:12px;color:var(--muted);background:rgba(122,34,51,.15);border:1px solid var(--line);border-radius:9px;padding:10px}
+.deadline b{color:var(--gold2)}
+/* Main */
+.main{flex:1;min-width:0;padding:38px 46px 80px;max-width:1000px;margin:0 auto}
+.chapter{display:none;animation:fade .35s ease}
+.chapter.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chapter-head{margin-bottom:18px}
+.chapter-head h2{
+  font-family:'Playfair Display',serif;font-weight:900;font-size:34px;line-height:1.15;margin:0;
+  background:linear-gradient(90deg,var(--gold2),#fff 60%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.lead{font-size:17px;color:#ddd6c6;border-left:3px solid var(--gold);padding:6px 0 6px 16px;margin:0 0 22px;font-style:italic}
+h3{font-family:'Playfair Display',serif;color:var(--gold2);font-size:22px;margin:30px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h4{font-family:'PT Sans',sans-serif;color:var(--gold2);margin:0 0 6px;font-size:15px;letter-spacing:.3px}
+p{margin:0 0 14px}
+.cards{list-style:none;margin:0 0 18px;padding:0}
+.cards li,.checklist li{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--bordeaux);border-radius:8px;padding:11px 14px;margin:8px 0;font-size:15px}
+.checklist{list-style:decimal;padding-left:22px}
+.checklist li{border-left:none}
+.quote{background:linear-gradient(90deg,rgba(122,34,51,.22),rgba(122,34,51,0));border-left:3px solid var(--gold);padding:12px 16px;font-style:italic;color:#e9e1cf;border-radius:0 8px 8px 0;margin:18px 0}
+.topic-grid,.author-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:14px 0}
+.topic,.author{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;transition:.18s}
+.topic:hover,.author:hover{border-color:var(--gold);box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.author p{font-size:14px;margin:0;color:#d7d0c2}
+.topic p{font-size:14px;margin:0;color:#d7d0c2}
+.timeline{margin:14px 0;border-left:2px solid var(--bordeaux);padding-left:16px}
+.tl{position:relative;margin:0 0 14px;font-size:14.5px;color:#d7d0c2}
+.tl:before{content:'';position:absolute;left:-22px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(201,162,75,.18)}
+.era{display:inline-block;font-family:'PT Sans',sans-serif;font-weight:700;color:var(--gold2);margin-right:8px;text-transform:uppercase;font-size:12px;letter-spacing:1px}
+.cheat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 18px}
+.cheat p{font-size:14.5px;margin:12px 0}
+/* Images */
+.media-block{margin:30px 0 10px}
+.media-title{font-size:16px;color:var(--muted);font-family:'PT Sans',sans-serif;letter-spacing:.5px}
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:12px 0}
+figure.fig{margin:0;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+figure.fig img{width:100%;height:230px;object-fit:cover;display:block;background:#000}
+figure.fig figcaption{padding:9px 11px;font-size:12.5px;color:#cfc8ba;line-height:1.4}
+figure.fig .credit{display:block;margin-top:5px;font-size:11px;color:var(--muted);font-style:italic}
+.img-ph{width:100%;height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:repeating-linear-gradient(45deg,#191320,#191320 10px,#211a30 10px,#211a30 20px);color:var(--muted);text-align:center;padding:14px}
+.img-ph span{font-size:26px}
+.img-ph small{font-size:12px;color:var(--gold2);max-width:90%}
+/* Quiz */
+.quiz-block{margin:34px 0 10px;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+.quiz-block h3{margin-top:0;border-bottom:1px solid var(--line)}
+.q{margin:18px 0;padding:14px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:9px}
+.q .qt{font-weight:700;font-size:15.5px;color:#fff;margin-bottom:10px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;padding:10px 13px;cursor:pointer;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;font-family:'PT Sans',sans-serif;font-size:14px;transition:.15s}
+.opt:hover{border-color:var(--gold);color:var(--gold2)}
+.opt.correct{background:rgba(76,175,125,.22);border-color:var(--ok);color:#dffaec;font-weight:700}
+.opt.wrong{background:rgba(200,85,61,.2);border-color:var(--bad);color:#f6d8d0;font-weight:700}
+.opt:disabled{cursor:default;opacity:.92}
+.q .exp{margin-top:10px;font-size:13.5px;color:#d7d0c2;background:rgba(201,162,75,.08);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 6px 6px 0;display:none}
+.q .exp.show{display:block}
+.qscore{margin-top:16px;font-family:'Playfair Display',serif;font-size:18px;color:var(--gold2);font-weight:700}
+.qscore b{color:#fff}
+.restart{margin-top:10px;padding:9px 16px;cursor:pointer;background:linear-gradient(90deg,var(--bordeaux2),var(--bordeaux));color:#fff;border:1px solid var(--gold);border-radius:8px;font-family:'PT Sans',sans-serif;font-weight:700;font-size:13.5px}
+.restart:hover{filter:brightness(1.15)}
+.pager{display:flex;gap:12px;margin:34px 0 0}
+.pager-btn{flex:1;padding:13px 0;cursor:pointer;background:var(--card2);color:var(--gold2);border:1px solid var(--line);border-radius:10px;font-family:'PT Sans',sans-serif;font-weight:700;font-size:15px;transition:.18s}
+.pager-btn:hover{border-color:var(--gold);background:var(--card)}
+footer.foot{margin-top:50px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;text-align:center}
+/* Responsive */
+.menu-toggle{display:none}
+@media (max-width:880px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;flex:none;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--line)}
+  .main{padding:26px 18px 70px}
+  .chapter-head h2{font-size:27px}
+  .nav-btn{display:inline-block;width:auto;margin:4px}
+  .menu-toggle{position:sticky;top:0;z-index:5}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">РГИСИ<small>Режиссёр-драматург · Кобелев &amp; Чепуров</small></div>
+    <div class="side-sub">Интерактивное пособие для абитуриента-медиа-артиста. Читай главы, смотри архив, проверяй себя.</div>
+    <nav id="nav">
+      <button class="nav-btn" data-ch="0" onclick="showChapter(0)">Глава 0</button>
+      <button class="nav-btn" data-ch="1" onclick="showChapter(1)">Глава 1</button>
+      <button class="nav-btn" data-ch="2" onclick="showChapter(2)">Глава 2</button>
+      <button class="nav-btn" data-ch="3" onclick="showChapter(3)">Глава 3</button>
+      <button class="nav-btn" data-ch="4" onclick="showChapter(4)">Глава 4</button>
+
+    </nav>
+    <div class="nav-steps">
+      <button onclick="navPrev()">← Назад</button>
+      <button onclick="navNext()">Вперёд →</button>
+    </div>
+    <div class="deadline">Вступительные: <b>23</b> и <b>25 июля</b>.<br>Рубеж изучения: <b>19 июля</b>.</div>
+  </aside>
+  <main class="main" id="main">
+      <section class="chapter" id="chapter-0" data-ch="0">
+        <header class="chapter-head"><h2>Глава 0. Формат испытания и шесть тем</h2></header>
+        <div class="chapter-body">
+<p class="lead">Мастерская Н.В. Кобелева и А.А. Чепурова «Проектирование спектакля. Режиссёр-драматург».
+Вступительные <b>23 и 25 июля</b>, очно, на базе высшего образования. Твой профиль — медиа-артист:
+живой звук, видеопроекции, АВ-перформанс.</p>
+
+<h3>Два этапа испытания</h3>
+<ol class="cards">
+  <li><b>Режиссёрско-драматургический проект на заданную тему</b> — пишется на экзамене, очно. Формулировка: «предложить принцип инсценировки, включая режиссёрский ход».</li>
+  <li><b>Собеседование</b> — защита проекта / разговор о позиции.</li>
+</ol>
+<p>Тебе <b>не нужно</b> писать полный сценарий. Нужны: авторская концепция переноса литературы на сцену
++ конкретный <b>режиссёрский ход</b>, который делает её узнаваемой и неповторимой.</p>
+
+<h3>Чек-лист структуры проекта</h3>
+<ol class="checklist">
+  <li>Выбор и обоснование темы (почему именно она, и почему сейчас).</li>
+  <li>Сверхзадача / главная мысль спектакля (одна фраза).</li>
+  <li>Принцип инсценировки — как переводишь прозу/пьесу в сценическое событие.</li>
+  <li>Режиссёрский ход — центральная метафора/приём (у медиа-артиста это пространственно-медийная идея).</li>
+  <li>Сквозное действие и конфликт.</li>
+  <li>Пластика и мизансцены — 3–5 ключевых сцен-опор.</li>
+  <li>Решение пространства — сцена/зал/сайт-специфик.</li>
+  <li>Решение звука — живой звук / партитура / шумы (твой козырь).</li>
+  <li>Решение света и видео/проекций (твой козырь).</li>
+  <li>Связь с теорией — 1–2 опоры на авторов из списка.</li>
+</ol>
+
+<h3>Шесть тем — разбор через оптику АВ-перформанса</h3>
+<div class="topic-grid">
+  <div class="topic"><h4>1. «Каштанка» А.П. Чехов</h4><p>Собачий взгляд на человеческий мир. Звуковой ландшафт: человеческая речь как нечленораздельный шум, шаги как партитура. Видео — приземлённый уровень камеры. Ход: «сцена как нюх».</p></div>
+  <div class="topic"><h4>2. «Ведьма» А.П. Чехов</h4><p>Метель запирает почтмейстера с молодой женой лесника. Метель как медиум: живой звук ветра + проекции снега. Ход: «метель внутри комнаты» наступает на пару.</p></div>
+  <div class="topic"><h4>3. «Чайка» (1 акт) А.П. Чехов</h4><p>Театр в театре — идеально для постдраматического срыва условности. Озеро и чайка как проекционный экран. Ход: «чайка как проекция».</p></div>
+  <div class="topic"><h4>4. «Гамлет» (1 акт) У. Шекспир</h4><p>Гамлет как медиа-субъект: он записывает, наблюдает, сомневается в кадре. Видеонаблюдение, экраны, многоканальный звук. Ход: «Эльсинор под камерами».</p></div>
+  <div class="topic"><h4>5. «Дни Турбиных» М. Булгаков</h4><p>История наступает на частную жизнь. Дом = световая камера, звук улицы прорывается сквозь стены. Ход: «дом как архив» проецирует хронику.</p></div>
+  <div class="topic"><h4>6. «Счастливые дни» С. Беккет</h4><p>Винни по пояс (потом по шею) в песке; звук — единственное, что движет время. Абсолютный минимализм = чистый АВ-перформанс. Ход: «песок засыпает свет».</p></div>
+</div>
+<p class="quote">Твой главный козырь: список литературы РГИСИ <b>сам включает</b> Леманна, Фишер-Лихте, Шехнера,
+Голдберга, Годера, Гёббельса. Твой АВ-перформанс — не компромисс, а развитие линии, уже прописанной в программе.</p>
+</div>
+        <div class="media-block"><h3 class="media-title">Архивные материалы (Wikimedia Commons)</h3>
+          <div class="img-grid" id="img-host-0" data-img-host="0"></div>
+        </div>
+        <div class="quiz-block" id="quiz-0" data-quiz="0"></div>
+        <div class="pager">
+          <button class="pager-btn" onclick="navPrev()">← Назад</button>
+          <button class="pager-btn" onclick="navNext()">Вперёд →</button>
+        </div>
+      </section>
+      <section class="chapter" id="chapter-1" data-ch="1">
+        <header class="chapter-head"><h2>Глава 1. Теория театра и современный театр</h2></header>
+        <div class="chapter-body">
+<p class="lead">Классика (Аристотель → Брехт) и современный поворот (Лотман → Леманн → Фишер-Лихте → Гёббельс / Голдберг / Годер).
+Читай блок «Современный театр» приоритетно и глубоко.</p>
+
+<h3>Ключевые авторы и главные мысли</h3>
+<div class="author-grid">
+  <div class="author"><h4>Аристотель. «Поэтика»</h4><p>Трагедия = мимесис <i>действия</i>; цель — катарсис. Шесть частей по важности: <b>мифос → этос → дианоа → лексис → мелопея → опсис</b>. Гамартия — ошибка в суждении героя.</p></div>
+  <div class="author"><h4>Лотман. «Семиотика сцены»</h4><p>Сцена — знаковая система (текст во времени). Свет, предмет, движение — знаки в разных кодах. Для медиа-артиста: видео и звук тоже «пишут» текст.</p></div>
+  <div class="author"><h4>Эсслин. «Театр абсурда»</h4><p>Термин (1961): мир, необъяснимый разумом; язык распадается. Беккет — вершина. Легитимный язык для работы с «Счастливыми днями».</p></div>
+  <div class="author"><h4>Леманн. «Постдраматический театр» (1999)</h4><p>Текст перестаёт быть господствующим. Признаки: паратаксис, симультанность, музыкализация, пространственность. <b>Твой манифест.</b></p></div>
+  <div class="author"><h4>Фишер-Лихте. «Эстетика перформативности» (2004)</h4><p>Автопоэтическая петля актёр↔зритель рождает эмерджентное событие. Граница сцена/зал размывается; зритель — со-творец.</p></div>
+  <div class="author"><h4>Гёббельс. «Эстетика отсутствия» (2015)</h4><p>Отказ от диктата режиссёра и навязанного смысла. «Партитуры» для звука, света, текста сразу. Акузматический голос — звук без видимого источника.</p></div>
+  <div class="author"><h4>Голдберг. «Искусство перформанса»</h4><p>Перформанс — искусство времени (live art), от футуристов 1909 до сегодня. Ты — художник перформанса, не «диджей».</p></div>
+  <div class="author"><h4>Годер. «Визуальный театр»</h4><p>Приоритет образа, света, пластики над текстом. Карта твоего цеха в России.</p></div>
+</div>
+
+<h3>Единая линия: от Аристотеля к перформативности</h3>
+<ol class="cards">
+  <li><b>Аристотель</b> — модель драматического: мимесис, текст наверху, финал = катарсис.</li>
+  <li><b>Брехт</b> — взрывает катарсис → эпический театр, зритель мыслит.</li>
+  <li><b>Дидро → Крэг</b> — подрывают психологического актёра (сверхмарионетка).</li>
+  <li><b>Лотман</b> — сцена как знаковая система (мост к постструктурализму).</li>
+  <li><b>Леманн</b> — текст падает с трона → постдрама: симультанность, музыкализация, присутствие.</li>
+  <li><b>Фишер-Лихте</b> — спектакль как событие-становление с автопоэтической петлёй.</li>
+  <li><b>Гёббельс / Голдберг / Годер</b> — практики поворота: композитор-медиа-режиссёр, live art, визуальный театр.</li>
+</ol>
+<p class="quote">Твоя формула защиты: «Мой проект развивает линию Аристотель → Брехт → постдрама Леманна → перформативность Фишер-Лихте: я переношу центр с драматического текста на медиа-событие присутствия».</p>
+</div>
+        <div class="media-block"><h3 class="media-title">Архивные материалы (Wikimedia Commons)</h3>
+          <div class="img-grid" id="img-host-1" data-img-host="1"></div>
+        </div>
+        <div class="quiz-block" id="quiz-1" data-quiz="1"></div>
+        <div class="pager">
+          <button class="pager-btn" onclick="navPrev()">← Назад</button>
+          <button class="pager-btn" onclick="navNext()">Вперёд →</button>
+        </div>
+      </section>
+      <section class="chapter" id="chapter-2" data-ch="2">
+        <header class="chapter-head"><h2>Глава 2. Труды практиков театра</h2></header>
+        <div class="chapter-body">
+<p class="lead">От Станиславского до Брука и Гёббельса. Карточки источников, школы и преемственность, и — главное для тебя —
+блок «Самое релевантное для медиа-артиста» (АВ-перформанс).</p>
+
+<h3>Карточки практиков</h3>
+<div class="author-grid">
+  <div class="author"><h4>Станиславский. «Работа актёра над собой»</h4><p>Система психофизического воспитания: сверхзадача, сквозное действие, этюд, «если бы». Фундамент, от которого все отталкивались.</p></div>
+  <div class="author"><h4>Мейерхольд. «О театре»</h4><p>Театр представления, а не переживания. <b>Биомеханика</b>: тело как механизм. Конструктивизм: спектакль = станок. «Театр — увеличивающее стекло».</p></div>
+  <div class="author"><h4>Брехт. «Теория эпического театра»</h4><p>Эффект отчуждения (V-эффект): показывать, не сливаясь. Зритель должен удивиться, а не уснуть в узнавании.</p></div>
+  <div class="author"><h4>Арто. «Театр и его двойник»</h4><p>Театр жестокости: язык жеста, звука, света, ритуала, действующий на тело и подсознание. Прото-AV-перформанс.</p></div>
+  <div class="author"><h4>Крэг. «Актёр и сверхмарионетка»</h4><p>Сверхмарионетка — идеальный актёр-образ без капризов тела. Движущиеся экраны и свет — прообраз видеосцении.</p></div>
+  <div class="author"><h4>Гротовский. «Бедный театр»</h4><p>Снять всё лишнее — остаются актёр и зритель. Актёр как проводник. Позднее — «искусство-проводник», ритуал.</p></div>
+  <div class="author"><h4>Брук. «Пустое пространство»</h4><p>Театр = пустое пространство + актёр + зритель. Четыре вида: мёртвый, священный, затхлый, живой. Мультимедиа — равноправный элемент.</p></div>
+  <div class="author"><h4>Шехнер. «Теория перформанса»</h4><p>Перформанс шире театра: ритуал, спорт, политика. «Восстановленное поведение» — основа и ритуала, и театра.</p></div>
+  <div class="author"><h4>Вахтангов. «Фантастический реализм»</h4><p>Правда переживания + острая театральная форма (спектакль «Турандот»). Театр — праздник, а не быт.</p></div>
+  <div class="author"><h4>Евреинов. «Демон театральности»</h4><p>Театральность — врождённый «инстинкт превращения». Монодрама — прообраз субъективной камеры и видеомонтажа.</p></div>
+  <div class="author"><h4>Таиров. «Записки режиссёра»</h4><p>Синтетический театр: равноправие драмы, музыки, танца, пластики (прообраз мультимедиа). Актёр — «жрец и владыка театра».</p></div>
+  <div class="author"><h4>М. Чехов. «Об искусстве актёра»</h4><p>Творчество от образа и воображаемого центра. «Лучезарное существо» — идеальный творческий двойник. Мост к Гротовскому.</p></div>
+  <div class="author"><h4>Товстоногов. «Зеркало сцены»</h4><p>Режиссёр — интерпретатор; театр живёт «здесь и сейчас», отражая эпоху и зрителя.</p></div>
+  <div class="author"><h4>Эфрос. «Репетиция — любовь моя»</h4><p>Режиссура — процесс совместного постижения смысла. Спектакль не сочиняют, а открывают с актёром.</p></div>
+</div>
+
+<h3>Самое релевантное для медиа-артиста (АВ-перформанс)</h3>
+<p>Пять источников — твоя база, читать оригиналом:</p>
+<ul class="cards">
+  <li><b>Арто</b> — звук/свет/ритуал как язык театра; сделай «двойника» спектакля — звуко-световой слой, состязающийся с телом.</li>
+  <li><b>Шехнер</b> — перформанс ≠ театр; строй драматургию из повторяющегося АВ-жеста (луп, грануляция, видео-эхо).</li>
+  <li><b>Гёббельс</b> — акузматический голос; «смена иерархий»: середина, где звук глушит видео, финал — где оба стихают в отсутствии.</li>
+  <li><b>Крэг</b> — сверхмарионетка читается как проекционный/цифровой двойник актёра; введи «сверхмарионетку» на тело.</li>
+  <li><b>Брук</b> — начни с пустого пространства и обоснуй, как АВ наполняет его, не превращая в «затхлый» или «мёртвый» театр.</li>
+</ul>
+<p class="quote">Линия: <b>Арто → Шехнер → Гёббельс → Крэг → Брук</b>. Звук, свет и видео перестают быть декорацией и становятся драматургией.</p>
+</div>
+        <div class="media-block"><h3 class="media-title">Архивные материалы (Wikimedia Commons)</h3>
+          <div class="img-grid" id="img-host-2" data-img-host="2"></div>
+        </div>
+        <div class="quiz-block" id="quiz-2" data-quiz="2"></div>
+        <div class="pager">
+          <button class="pager-btn" onclick="navPrev()">← Назад</button>
+          <button class="pager-btn" onclick="navNext()">Вперёд →</button>
+        </div>
+      </section>
+      <section class="chapter" id="chapter-3" data-ch="3">
+        <header class="chapter-head"><h2>Глава 3. История театра и четыре темы</h2></header>
+        <div class="chapter-body">
+<p class="lead">От античности до постдрамы — и четыре автора твоих тем: Чехов, Шекспир, Булгаков, Беккет.
+Сквозная линия для медиа-артиста: на каждом витке театр снова открывает, что форма (свет, тело, ритм, медиа) важнее слова.</p>
+
+<h3>Хронологическая шкала (фрагменты)</h3>
+<div class="timeline">
+  <div class="tl"><span class="era">Античность</span> мимесис, катарсис, маска, амфитеатр — фундамент драматургии.</div>
+  <div class="tl"><span class="era">Средневековье</span> мистерия, <b>симультанная сцена</b> (все планы мира сразу) = ранний «сплит-скрин».</div>
+  <div class="tl"><span class="era">Возрождение</span> театрум мунди («весь мир — театр»), открытая сцена, барокко.</div>
+  <div class="tl"><span class="era">Классицизм/Просвещение</span> три единства, зародыш четвёртой стены, Дидро (актёр не чувствует, а знает).</div>
+  <div class="tl"><span class="era">XIX в.</span> психологический театр, система Станиславского; Чехов разрушает интригу действием-настроением.</div>
+  <div class="tl"><span class="era">Рубеж веков</span> символизм, модерн: свет/цвет/ритм важнее слова — мост к медиа-театру.</div>
+  <div class="tl"><span class="era">Начало XX</span> биомеханика, конструктивизм, монтаж — основа видеомонтажа и АВ-ритма.</div>
+  <div class="tl"><span class="era">Середина XX</span> эпический театр, абсурд, «бедный театр», театр художника — свет/видео/звук как драматурги.</div>
+  <div class="tl"><span class="era">Конец XX–XXI</span> постдрама, перформанс, медиа-инсталляция, АВ-перформанс — твоя зона.</div>
+</div>
+
+<h3>Четыре темы вступительных</h3>
+<div class="topic-grid">
+  <div class="topic"><h4>Чехов</h4><p>Разрушил театр интриги: «ничего не происходит», но всё меняется. Конфликт — между человеком и временем. МХТ, Чехов М. (воображаемый центр), Станиславский. Ход: подтекст и пауза = материал, равный звуку.</p></div>
+  <div class="topic"><h4>Шекспир</h4><p>Открытая ренессансная сцена; «весь мир — театр». Бартошевич, Бачелис/Крэг (экран-ширма, свет как соавтор), Товстоногов. Ход: живой план + видео-двойник + звук-хор.</p></div>
+  <div class="topic"><h4>Булгаков</h4><p>«Дни Турбиных» — дом под обстрелом истории. Премьера МХАТ <b>5 октября 1926</b>, реж. И. Судаков, 987 спектаклей. Смелянский, Соловьёва, Руднев («Драма памяти»). Ход: проекция внешнего хаоса поверх гостиной.</p></div>
+  <div class="topic"><h4>Беккет</h4><p>Вершина абсурда: текст распадается, остаются ритм, тело, повтор. «Счастливые дни» — прем. <b>17 сентября 1961</b>. Эсслин, Леманн (постдрама), Фишер-Лихте. Ход: неподвижное тело + видео «засыпает/освобождает» + звук-ритм тщетности.</p></div>
+</div>
+
+<h3>Предтечи АВ-перформанса</h3>
+<p>Роберт Уилсон («театр художника»), Крэг и Аппиа (световой театр 1900-х), Гротовский (редукция),
+циркизация (Мейерхольд, футуристы), Евреинов (театральность), дель арте и маски (видеомэппинг = новая маска),
+символизм и модерн. <b>Твой рабочий арсенал уже описан в списке литературы РГИСИ.</b></p>
+</div>
+        <div class="media-block"><h3 class="media-title">Архивные материалы (Wikimedia Commons)</h3>
+          <div class="img-grid" id="img-host-3" data-img-host="3"></div>
+        </div>
+        <div class="quiz-block" id="quiz-3" data-quiz="3"></div>
+        <div class="pager">
+          <button class="pager-btn" onclick="navPrev()">← Назад</button>
+          <button class="pager-btn" onclick="navNext()">Вперёд →</button>
+        </div>
+      </section>
+      <section class="chapter" id="chapter-4" data-ch="4">
+        <header class="chapter-head"><h2>Глава 4. План чтения и шпаргалка</h2></header>
+        <div class="chapter-body">
+<p class="lead">Сводный график на 15–19 июля и одностраничная шпаргалка — твоя речь на собеседовании.
+Проекты — <b>23 и 25 июля</b>.</p>
+
+<h3>Сводный график (5 дней)</h3>
+<ol class="cards">
+  <li><b>15 июля — фундамент:</b> Аристотель «Поэтика», Дидро «Парадокс об актёре», Станиславский «Работа актёра над собой», Брук «Пустое пространство», Чепуров «Театральный сверхсюжет» (конспект).</li>
+  <li><b>16 июля — постдрама + Чехов/Булгаков:</b> Леманн «Постдраматический театр», Арто «Театр и его двойник», Соловьёва и Смелянский (МХТ), Зингерман (Чехов).</li>
+  <li><b>17 июля — перформативность + Шекспир:</b> Фишер-Лихте, Шехнер, Мейерхольд, Брехт, Бартошевич, Бачелис «Шекспир и Крэг».</li>
+  <li><b>18 июля — медиа-блок + Беккет:</b> Гёббельс «Эстетика отсутствия», Крэг «Сверхмарионетка», Эсслин «Театр абсурда», Березкин «Роберт Уилсон», Голдберг, Годер, Руднев, Скороход.</li>
+  <li><b>19 июля — авангард, перформанс, финал:</b> Рудницкий (Мейерхольд), Сергеев (циркизация), Джурова (Евреинов), Степанова (Гротовский), Юрковский (маски), Васильев «Parautopia». Сверстать проекты по ВСЕМ 6 темам, выучить шпаргалку.</li>
+</ol>
+
+<h3>Единый шаблон проекта</h3>
+<p class="quote">Тема → <b>Сверхсюжет</b> (Чепуров) → драматургический конфликт → пространство/сцена →
+<b>медиа-решение</b> (живой звук + видео: что, где, зачем) → актёр (система/биомеханика/маска) →
+опора в списке литературы (имя книги как аргумент).</p>
+
+<h3>Одностраничная шпаргалка (учи наизусть)</h3>
+<div class="cheat">
+  <p><b>5 столпов для медиа-артиста (оригинал):</b> 1) Арто — звук/свет/ритуал; 2) Шехнер — перформанс, восстановленное поведение; 3) Гёббельс — акузматический голос, эстетика отсутствия; 4) Крэг — сверхмарионетка, конструкция света; 5) Брук — пустое пространство.</p>
+  <p><b>3 опоры для драматургии:</b> Станиславский (сверхзадача), Мейерхольд + Брехт (конструкция и очуждение), Гротовский (редукция).</p>
+  <p><b>Постдрама (Леманн):</b> текст не доминирует; приоритет присутствию / симультанности / музыкализации.</p>
+  <p><b>Перформативность (Фишер-Лихте):</b> спектакль — самоорганизующееся событие-становление, автопоэтическая петля актёр↔зритель.</p>
+</div>
+
+<h3>Главный тезис для собеседования</h3>
+<p class="quote">«Я рассматриваю звук, видео и свет не как оформление, а как <b>драматургию</b> спектакля —
+в линии Арто, Крэга, Гёббельса и Шехнера, где медиа становятся самостоятельными действующими лицами,
+а режиссёр-драматург выстраивает их партитуру.»</p>
+<p class="quote">Связка эпох: АВ-перформанс — не новинка, а вершина линии
+<b>Уилсон → Крэг/Аппиа → Евреинов → Мейерхольд → Гротовский</b> (все — в списке РГИСИ).</p>
+</div>
+        <div class="media-block"><h3 class="media-title">Архивные материалы (Wikimedia Commons)</h3>
+          <div class="img-grid" id="img-host-4" data-img-host="4"></div>
+        </div>
+        <div class="quiz-block" id="quiz-4" data-quiz="4"></div>
+        <div class="pager">
+          <button class="pager-btn" onclick="navPrev()">← Назад</button>
+          <button class="pager-btn" onclick="navNext()">Вперёд →</button>
+        </div>
+      </section>
+
+    <footer class="foot">Собрано из пособия РГИСИ (главы 0–4). Иллюстрации — Wikimedia Commons (лицензии указаны под каждым снимком). Без использования браузерного хранилища.</footer>
+  </main>
+</div>
+
+<script>
+/* ===== STATE (no localStorage / sessionStorage — file:// safe) ===== */
+var currentChapter = 0;
+var totalChapters = 5;
+var quizState = {}; // chapter -> array of answered-correct flags (JS only)
+
+/* Image data: [chapter, url, caption, credit] */
+var IMAGES = [[0, "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Chekhov_1898_by_Osip_Braz.jpg/500px-Chekhov_1898_by_Osip_Braz.jpg", "А.П. Чехов — автор четырёх из шести тестовых тем (Каштанка, Ведьма, Чайка)", "О. Браз, 1898 · Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/500px-Shakespeare.jpg", "У. Шекспир — тема «Гамлет» (1 акт)", "Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Nesterov_Florensky_Bulgakov.jpg/500px-Nesterov_Florensky_Bulgakov.jpg", "М.А. Булгаков среди философов (М. Нестеров, фрагмент) — тема «Дни Турбиных»", "М. Нестеров · Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Samuel_Beckett%2C_Pic%2C_1.jpg/500px-Samuel_Beckett%2C_Pic%2C_1.jpg", "С. Беккет — тема «Счастливые дни» (театр абсурда)", "Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Moscow_Art_Theatre_production_of_Anton_Chekhov%27s_The_Seagull_1898.jpg/500px-Moscow_Art_Theatre_production_of_Anton_Chekhov%27s_The_Seagull_1898.jpg", "«Чайка» в МХТ, 1898 — точка отсчёта психологического театра", "Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Bernhardt_Hamlet2.jpg/500px-Bernhardt_Hamlet2.jpg", "«Гамлет» — тема вступительных (фото С. Бернар в заглавной роли)", "Wikimedia Commons, Public domain"], [0, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/New_comedy_first_slave_theatre_mask_NAMA3373_Athens_Greece.jpg/500px-New_comedy_first_slave_theatre_mask_NAMA3373_Athens_Greece.jpg", "Античная театральная маска — символ театральности", "Wikimedia Commons, CC0"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Aristotle_Altemps_Inv8575.jpg/500px-Aristotle_Altemps_Inv8575.jpg", "Аристотель — «Поэтика», первый систематический разбор трагедии", "Wikimedia Commons, Public domain"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Bertolt_Brecht_Portrait-2.jpg/500px-Bertolt_Brecht_Portrait-2.jpg", "Б. Брехт — эпический театр и эффект отчуждения", "Wikimedia Commons, CC BY-SA 4.0"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Hans_Thies_Lehmann.png/500px-Hans_Thies_Lehmann.png", "Х.-Т. Леманн — «Постдраматический театр» (1999)", "Wikimedia Commons, CC BY-SA 4.0"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Roemerberggespraeche-okt-2017-erika-fischer-lichte-3163.jpg/500px-Roemerberggespraeche-okt-2017-erika-fischer-lichte-3163.jpg", "Э. Фишер-Лихте — «Эстетика перформативности» (2004)", "Wikimedia Commons, CC BY-SA 4.0"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Heiner_Goebbels_06A.jpg/500px-Heiner_Goebbels_06A.jpg", "Х. Гёббельс — «Эстетика отсутствия» (2015)", "Wikimedia Commons, CC BY-SA 3.0"], [1, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Adolphe_Appia.jpg/500px-Adolphe_Appia.jpg", "А. Аппиа — свет как главный соавтор спектакля (предтеча медиа-театра)", "Wikimedia Commons, CC BY-SA 2.0"], [2, "https://upload.wikimedia.org/wikipedia/commons/6/66/Bundesarchiv_Bild_183-18073-0003%2C_Konstantin_Sergejewitsch_Stanislawski.jpg", "К.С. Станиславский — создатель системы психофизического воспитания актёра", "Bundesarchiv · Wikimedia Commons, CC BY-SA 3.0 de"], [2, "https://upload.wikimedia.org/wikipedia/commons/e/e8/Vsevolod_Meyerhold.jpg", "В.Э. Мейерхольд — биомеханика и «театр представления»", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Antonin_Artaud_1926.jpg/500px-Antonin_Artaud_1926.jpg", "А. Арто — «Театр и его двойник», театр жестокости", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Portrait_of_Edward_Gordon_Craig.jpg/500px-Portrait_of_Edward_Gordon_Craig.jpg", "Э.Г. Крэг — сверхмарионетка и конструкция света", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edward-Gordon-Craig-1910s.jpg/500px-Edward-Gordon-Craig-1910s.jpg", "Крэг о сценографии света и движущихся экранов (прообраз видеомэппинга)", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Jerzy_Grotowski.jpg/500px-Jerzy_Grotowski.jpg", "Е. Гротовский — «Бедный театр», редукция до актёра и зрителя", "Wikimedia Commons, Attribution"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Peter_Brook.JPG/500px-Peter_Brook.JPG", "П. Брук — «Пустое пространство» (1968)", "Wikimedia Commons, CC0"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Kolyada-Theatre%2C_rehearsal%2C_March_2014.01.jpg/500px-Kolyada-Theatre%2C_rehearsal%2C_March_2014.01.jpg", "Репетиция спектакля — поле «перформанс-студий» Р. Шехнера", "Wikimedia Commons, CC BY-SA 4.0"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Michael_Chekhov_1910%D1%85.jpg/500px-Michael_Chekhov_1910%D1%85.jpg", "М.А. Чехов — племянник А.П., «воображаемый центр», мост к Гротовскому", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Evreinov_by_Repin.jpg/500px-Evreinov_by_Repin.jpg", "Н. Евреинов — «Демон театральности», инстинкт превращения", "И. Репин · Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Vakhtangov_Yevgeny-1.jpg/500px-Vakhtangov_Yevgeny-1.jpg", "Е. Вахтангов — «фантастический реализм»", "Wikimedia Commons, Public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Alexander_Tairov.jpg/500px-Alexander_Tairov.jpg", "А. Таиров — Камерный театр, синтетический театр", "Wikimedia Commons, public domain"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Portrait_of_Robert_Wilson_with_his_installation_%22A_House_for_Edwin_Denby%22.jpg/500px-Portrait_of_Robert_Wilson_with_his_installation_%22A_House_for_Edwin_Denby%22.jpg", "Р. Уилсон — «театр художника», свет/звук как драматургия", "Wikimedia Commons, CC BY-SA 4.0"], [2, "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Moscow_Chekhov_Art_Theatre_03-2016.jpg/500px-Moscow_Chekhov_Art_Theatre_03-2016.jpg", "МХТ им. Чехова — наследник психологической школы", "Wikimedia Commons, FAL"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Alexandrinsky_Theatre.jpg/500px-Alexandrinsky_Theatre.jpg", "Александринский театр — петербургская традиция, к которой восходит РГИСИ", "Wikimedia Commons, CC BY-SA 4.0"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Shakespeare.jpg/500px-Shakespeare.jpg", "Шекспир — «Гамлет», модель «театра как мира»", "Wikimedia Commons, Public domain"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Nesterov_Florensky_Bulgakov.jpg/500px-Nesterov_Florensky_Bulgakov.jpg", "Булгаков — «Дни Турбиных» во МХАТе (прем. 5 октября 1926)", "М. Нестеров · Wikimedia Commons, Public domain"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Samuel_Beckett%2C_Pic%2C_1.jpg/500px-Samuel_Beckett%2C_Pic%2C_1.jpg", "Беккет — вершина «театра абсурда»", "Wikimedia Commons, Public domain"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Bernhardt_Hamlet2.jpg/500px-Bernhardt_Hamlet2.jpg", "«Гамлет» — медиа-субъект под камерами Эльсинора", "Wikimedia Commons, Public domain"], [3, "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/New_comedy_first_slave_theatre_mask_NAMA3373_Athens_Greece.jpg/500px-New_comedy_first_slave_theatre_mask_NAMA3373_Athens_Greece.jpg", "Маска и кукла — остранение тела (Юрковский)", "Wikimedia Commons, CC0"]];
+
+/* Quiz data: chapter -> [ [question, [opts], correctIndex, explanation], ... ] */
+var QUIZZES = {"0": [["Сколько тем предложено для письменного задания (режиссёрско-драматургического проекта)?", ["Четыре", "Пять", "Шесть", "Три"], 2, "В задании шесть тем: Каштанка, Ведьма, Чайка (1 акт), Гамлет (1 акт), Дни Турбиных, Счастливые дни."], ["Какая тема строится как взгляд на мир «глазами и ушами собаки»?", ["«Ведьма»", "«Каштанка»", "«Чайка»", "«Гамлет»"], 1, "«Каштанка» — собака меняет хозяев; звуковой ландшафт человеческой речи дан как шум."], ["Какая тема связана с метелью, запертыми в комнате телами и границей реального/галлюцинаторного?", ["«Чайка»", "«Ведьма»", "«Счастливые дни»", "«Дни Турбиных»"], 1, "«Ведьма» Чехова: метель как медиум, камерный АВ-перформанс двух тел."], ["Какой акт «Чайки» входит в список тем?", ["Первый", "Второй", "Третий", "Пятый"], 0, "Тема — 1 акт «Чайки» (саморефлексия театра, «новый театр» Треплева)."], ["«Дни Турбиных» — инсценировка по роману какого автора?", ["А.П. Чехов", "М.А. Булгаков", "У. Шекспир", "С. Беккет"], 1, "«Дни Турбиных» по роману «Белая гвардия» Булгакова; премьера МХАТ 5 октября 1926."], ["Кто из четырёх авторов тем связан с «театром абсурда»?", ["А.П. Чехов", "У. Шекспир", "С. Беккет", "М.А. Булгаков"], 2, "С. Беккет — вершина театра абсурда (Эсслин); тема «Счастливые дни»."]], "1": [["Автор «Поэтики» — первого систематического разбора трагедии?", ["Аристотель", "Б. Брехт", "Ю. Лотман", "Х.-Т. Леманн"], 0, "Аристотель (IV в. до н. э.), «Поэтика» — шесть частей трагедии, мимесис, катарсис."], ["Что Аристотель ставит на ПОСЛЕДНЕЕ место в иерархии частей трагедии?", ["Мифос (фабула)", "Этос (характер)", "Опсис (зрелище)", "Лексис (слово)"], 2, "Опсис (зрелище/видение) — последний; мелопея (музыка/звук) — предпоследняя. Постдрама это взорвёт."], ["Кто ввёл термин «театр абсурда» (книга 1961)?", ["М. Эсслин", "Ю. Лотман", "Ю. Барбой", "С.В. Владимиров"], 0, "Мартин Эсслин, «Театр абсурда» (1961) — мир, необъяснимый разумом; язык распадается."], ["«Постдраматический театр» — автор и год?", ["Брехт, 1930-е", "Леманн, 1999", "Гёббельс, 2015", "Фишер-Лихте, 2004"], 1, "Ханс-Тис Леманн, «Postdramatisches Theater», 1999: текст больше не доминирует."], ["Автор «Эстетики перформативности» (2004)?", ["Р. Голдберг", "Э. Фишер-Лихте", "Д. Годер", "Э. Бентли"], 1, "Эрика Фишер-Лихте: автопоэтическая петля актёр↔зритель, событие-становление."], ["Кто предложил «эстетику отсутствия» — отказ от диктата режиссёра и навязанного смысла?", ["Х. Гёббельс", "Ю. Лотман", "Аристотель", "Б. Костелянец"], 0, "Хайнер Гёббельс (2015): партитуры для всех медиа-слоёв, «театр меняющихся иерархий»."], ["«Сцена — это текст, развивающийся во времени» — чья идея семиотики сцены?", ["Д. Дидро", "Ю. Лотман", "М. Эсслин", "Ю. Барбой"], 1, "Ю. Лотман, «Семиотика сцены» (1980): сцена как знаковая/моделирующая система."]], "2": [["Создатель «системы» психофизического воспитания актёра (сверхзадача, сквозное действие)?", ["К.С. Станиславский", "В.Э. Мейерхольд", "Б. Брехт", "А. Таиров"], 0, "Станиславский: единство психики и тела; работа через действие к подлинному чувству."], ["Автор идеи «сверхмарионетки» (Über-marionette)?", ["Э.Г. Крэг", "Д. Дидро", "В.Э. Мейерхольд", "А. Арто"], 0, "Эдвард Гордон Крэг: идеальный актёр-образ без капризов тела — прообраз проекционного двойника."], ["«Биомеханика» — метод тела как механизма — принадлежит", ["В.Э. Мейерхольду", "К.С. Станиславскому", "Б. Брехту", "Е. Гротовскому"], 0, "Мейерхольд: движение из контрдействий, как ритмическая партитура; «театр представления»."], ["«Эпический театр» и эффект отчуждения (Verfremdung) — это", ["Б. Брехт", "А. Арто", "П. Брук", "Н. Евреинов"], 0, "Брехт: зритель должен мыслить, а не сопереживать; знак «я это показываю»."], ["«Театр и его двойник», театр жестокости — это", ["А. Арто", "Э.Г. Крэг", "А. Таиров", "Р. Шехнер"], 0, "Антонен Арто: театр как язык жеста, звука, света, ритуала, действующий на тело."], ["«Бедный театр» — редукция до встречи актёра и зрителя — это", ["Е. Гротовский", "П. Брук", "Е. Вахтангов", "К.С. Станиславский"], 0, "Гротовский: снять всё лишнее, обнажить присутствие; позднее — «искусство-проводник»."], ["«Пустое пространство» = актёр + зритель + ?", ["пустое пространство", "декорация", "готовый сценарий", "афиша"], 0, "Питер Брук: театр рождается из минимума — пустой комнаты, человека и наблюдателя."], ["«Теория перформанса», восстановленное поведение (restored behavior) — это", ["Р. Шехнер", "Э. Фишер-Лихте", "Х. Гёббельс", "Р. Голдберг"], 0, "Ричард Шехнер: перформанс шире театра; исполнение = «дважды прожитое» поведение."]], "3": [["Премьера «Дней Турбиных» во МХАТе состоялась", ["5 октября 1926", "1918 году", "1932 году", "1903 году"], 0, "Премьера МХАТ 5 октября 1926, реж. И. Судаков; до 1941 — 987 представлений."], ["«Весь мир — театр» — чья ренессансная формула?", ["У. Шекспир", "Аристотель", "А.П. Чехов", "Б. Брехт"], 0, "Шекспир (театрум мунди): мир как модель театра — опора медиа-режиссуры."], ["Премьера «Счастливых дней» С. Беккета состоялась", ["17 сентября 1961", "1953 году", "1970 году", "1949 году"], 0, "Премьера 17 сентября 1961, Cherry Lane Theatre (Нью-Йорк), реж. А. Шнайдер."], ["Кто сделал свет и экран-ширму равноправными авторами шекспировского спектакля (Бачелис)?", ["Э.Г. Крэг", "К.С. Станиславский", "В.Э. Мейерхольд", "Е. Гротовский"], 0, "Гордон Крэг предвосхитил видеопроекцию экраном-ширмой ещё в 1900-х."], ["«Театрум мунди» — метафора театра как модели мира эпохи", ["Возрождения", "античности", "классицизма", "средневековья"], 0, "Ренессанс открывает «театр как модель мира» и открытый тип сцены."], ["«Роберт Уилсон. Театр художника» (Березкин) — ключевая книга для", ["медиа-артиста", "классициста", "натуралиста", "романтика"], 0, "Уилсон — «театр художника»: свет/мизансцена/звук как драматургия; твой прямой патрон."]], "4": [["Главный тезис для собеседования: звук, видео и свет — это", ["драматургия, а не оформление", "лишь декорация", "случайный шум", "замена текста"], 0, "«Я рассматриваю звук, видео и свет не как оформление, а как драматургию спектакля»."], ["Сколько «столпов для медиа-артиста» в одностраничной шпаргалке?", ["Пять", "Три", "Четыре", "Шесть"], 0, "5 столпов: Арто, Шехнер, Гёббельс, Крэг, Брук (читать оригинал)."], ["«Театральный сверхсюжет» — понятие какого автора (будущего руководителя мастерской)?", ["А.А. Чепуров", "Х.-Т. Леманн", "Х. Гёббельс", "Г.А. Товстоногов"], 0, "Александр Чепуров: надспектаклевая сквозная структура смыслов — язык мастерской."], ["Какое число — рубеж изучения пособия перед проектами?", ["19 июля", "23 июля", "1 августа", "15 июля"], 0, "До 19.07 — изучить пособие, прочитать приоритетное, выучить шпаргалку."], ["Вступительные испытания (проект + собеседование) проходят", ["23 и 25 июля", "15 и 16 июля", "1 и 2 августа", "20 и 22 июля"], 0, "23.07 и 25.07 — режиссёрско-драматургический проект на заданную тему + собеседование."], ["Линия предтеч АВ-перформанса (по шпаргалке):", ["Уилсон → Крэг/Аппиа → Евреинов → Мейерхольд → Гротовский", "Станиславский → Чехов", "Брехт → Аристотель", "Шекспир → Булгаков"], 0, "АВ-перформанс — вершина линии, уже прописанной в списке литературы РГИСИ."]]};
+
+/* Placeholder when an image fails to load (e.g. opened offline) */
+function imgFail(img){
+  try{
+    var fig = img.parentNode;
+    if(!fig) return;
+    var ph = document.createElement('div');
+    ph.className = 'img-ph';
+    var cap = img.getAttribute('data-cap') || 'Архивное фото';
+    ph.innerHTML = '<span>&#127917;</span><small>'+cap+'</small>';
+    img.style.display = 'none';
+    fig.insertBefore(ph, fig.firstChild);
+  }catch(e){ /* ignore */ }
+}
+
+/* Build image grids per chapter */
+function buildImages(){
+  try{
+    var hosts = document.querySelectorAll('[data-img-host]');
+    hosts.forEach(function(host){
+      var ch = parseInt(host.getAttribute('data-img-host'),10);
+      IMAGES.forEach(function(im){
+        if(im[0] !== ch) return;
+        var fig = document.createElement('figure');
+        fig.className = 'fig';
+        var image = document.createElement('img');
+        image.src = im[1];
+        image.alt = im[2];
+        image.loading = 'lazy';
+        image.setAttribute('data-cap', im[2]);
+        image.onerror = function(){ imgFail(this); };
+        var cap = document.createElement('figcaption');
+        cap.innerHTML = escapeHtml(im[2]) + '<span class="credit">'+escapeHtml(im[3])+'</span>';
+        fig.appendChild(image);
+        fig.appendChild(cap);
+        host.appendChild(fig);
+      });
+    });
+  }catch(e){ console.warn('buildImages', e); }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* Show a chapter */
+function showChapter(n){
+  try{
+    if(n < 0) n = 0;
+    if(n > totalChapters-1) n = totalChapters-1;
+    currentChapter = n;
+    var sections = document.querySelectorAll('.chapter');
+    sections.forEach(function(s){
+      var idx = parseInt(s.getAttribute('data-ch'),10);
+      if(idx === n){ s.classList.add('active'); }
+      else { s.classList.remove('active'); }
+    });
+    var btns = document.querySelectorAll('.nav-btn');
+    btns.forEach(function(b){
+      var idx = parseInt(b.getAttribute('data-ch'),10);
+      if(idx === n) b.classList.add('active'); else b.classList.remove('active');
+    });
+    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+  }catch(e){ console.warn('showChapter', e); }
+}
+
+function navPrev(){ showChapter(currentChapter - 1); }
+function navNext(){ showChapter(currentChapter + 1); }
+
+/* Build quizzes */
+function buildQuiz(ch, container){
+  try{
+    var qs = QUIZZES[ch] || [];
+    quizState[ch] = new Array(qs.length).fill(false);
+    var html = '<h3>Проверь себя</h3>';
+    qs.forEach(function(q, qi){
+      html += '<div class="q" data-q="'+qi+'">';
+      html += '<div class="qt">'+ (qi+1) +'. '+ escapeHtml(q[0]) +'</div>';
+      html += '<div class="opts">';
+      q[1].forEach(function(opt, oi){
+        html += '<button class="opt" data-q="'+qi+'" data-o="'+oi+'" onclick="answer('+ch+','+qi+','+oi+',this)">'+ escapeHtml(opt) +'</button>';
+      });
+      html += '</div>';
+      html += '<div class="exp" id="exp-'+ch+'-'+qi+'">'+ escapeHtml(q[3]) +'</div>';
+      html += '</div>';
+    });
+    html += '<div class="qscore" id="score-'+ch+'"></div>';
+    html += '<button class="restart" onclick="restartQuiz('+ch+')">Пройти заново</button>';
+    container.innerHTML = html;
+  }catch(e){ console.warn('buildQuiz', e); }
+}
+
+function answer(ch, qi, oi, btn){
+  try{
+    var qs = QUIZZES[ch];
+    if(!qs) return;
+    var q = qs[qi];
+    var qEl = btn.parentNode.parentNode; // .q
+    var opts = qEl.querySelectorAll('.opt');
+    if(qEl.getAttribute('data-done') === '1') return; // already answered
+    qEl.setAttribute('data-done','1');
+    opts.forEach(function(o){
+      o.disabled = true;
+      var oidx = parseInt(o.getAttribute('data-o'),10);
+      if(oidx === q[2]) o.classList.add('correct');
+    });
+    if(oi === q[2]){
+      btn.classList.add('correct');
+      quizState[ch][qi] = true;
+    } else {
+      btn.classList.add('wrong');
+    }
+    var exp = document.getElementById('exp-'+ch+'-'+qi);
+    if(exp) exp.classList.add('show');
+    updateScore(ch);
+  }catch(e){ console.warn('answer', e); }
+}
+
+function updateScore(ch){
+  try{
+    var arr = quizState[ch] || [];
+    var got = arr.filter(Boolean).length;
+    var total = arr.length;
+    var sc = document.getElementById('score-'+ch);
+    if(sc){
+      sc.innerHTML = 'Ваш результат: <b>'+got+'</b> из '+total+
+        (total>0 && got===total ? ' — идеально! &#127881;' : (total>0 && got>=total*0.6 ? ' — хороший результат.' : ' — перечитай главу и попробуй снова.'));
+    }
+  }catch(e){ console.warn('updateScore', e); }
+}
+
+function restartQuiz(ch){
+  try{
+    var c = document.getElementById('quiz-'+ch);
+    if(c) buildQuiz(ch, c);
+  }catch(e){ console.warn('restartQuiz', e); }
+}
+
+/* Init */
+function init(){
+  try{
+    for(var i=0;i<totalChapters;i++){
+      var c = document.getElementById('quiz-'+i);
+      if(c) buildQuiz(i, c);
+    }
+    buildImages();
+    showChapter(0);
+  }catch(e){ console.warn('init', e); }
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
